@@ -2,8 +2,8 @@
 from queue import Queue
 import unittest
 
-from paginator import Action, Output, ActionReader, OutputAborted
-import paginator
+from more_or_less import Action, Output, ActionReader, OutputAborted
+import more_or_less
 
 
 _big_page = 1000
@@ -43,7 +43,7 @@ class TestUtil(unittest.TestCase):
     def paginate(self, input, output=None, action=Action.print_next_page, page_height=_big_page, asynchronous=False):
         # Wrapper around paginate that adds some defaults that are handier for the tests.
         output = output or self.output
-        return paginator.paginate(
+        return more_or_less.paginate(
             input=input,
             output=output,
             action_reader=ActionReaderMock(action=action, observer=output),
@@ -60,7 +60,7 @@ class TestPaginate(TestUtil):
         self.assertEqual(['first \n', 'second \n'], self.output.output)
 
     def test_can_read_input_from_a_queue(self):
-        queue = _make_queue('first \n', 'second \n', paginator.END_OF_INPUT)
+        queue = _make_queue('first \n', 'second \n', more_or_less.END_OF_INPUT)
         self.paginate(queue)
 
         self.assertEqual(['first \n', 'second \n'], self.output.output)
@@ -125,7 +125,7 @@ class TestPaginate(TestUtil):
         )
 
         input_queue.put('first \n')
-        input_queue.put(paginator.END_OF_INPUT)
+        input_queue.put(more_or_less.END_OF_INPUT)
 
         controller.join(timeout=1)
 
@@ -157,7 +157,7 @@ class TestPaginate(TestUtil):
         )
 
         input_queue.put('first \n')
-        input_queue.put(paginator.END_OF_INPUT)
+        input_queue.put(more_or_less.END_OF_INPUT)
 
         self.assertTrue(bool(input_queue.unfinished_tasks))
 
@@ -239,7 +239,7 @@ class TestPaginate(TestUtil):
         )
 
         input_queue.put('this line is incomplete ')
-        input_queue.put(paginator.END_OF_INPUT)
+        input_queue.put(more_or_less.END_OF_INPUT)
 
         context.join(timeout=1)
 
@@ -269,7 +269,7 @@ class TestPaginate(TestUtil):
 
         page_height = 1
         input_queue.put('fourth \n')  # This call will prompt the more prompt again
-        input_queue.put(paginator.END_OF_INPUT)
+        input_queue.put(more_or_less.END_OF_INPUT)
 
         context.join(timeout=1)
 

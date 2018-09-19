@@ -40,7 +40,7 @@ def paginate(input, output=None, action_reader=None, page_height=None, asynchron
             Must follow the API described by the 'Output' object (but must not necessary inherit from this base-class).
             Note that a file can be used as output.
 
-            The paginator will start by sending enough input lines to the output to fill the page.
+            The more_or_less will start by sending enough input lines to the output to fill the page.
             After that no lines will be sent until the action_reader tells us to continue.
 
         page_height: 
@@ -94,7 +94,7 @@ def paginate(input, output=None, action_reader=None, page_height=None, asynchron
 
 class OutputAborted(Exception):
     '''
-        Exception raised when the paginator receives 'Action.abort' from the action-reader.
+        Exception raised when the more_or_less receives 'Action.abort' from the action-reader.
     '''
 
 
