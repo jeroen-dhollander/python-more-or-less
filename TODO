@@ -1,0 +1,6 @@
+# TODO(jeroend): Support the defaults for output/action_reader/page_height
+# TODO(jeroend): Make 'Action' an actual class, and have abort/print_next_page/... return class instances.
+#                Then, this returned instance should do the selection whether a line should be printed or not.
+#                This will allow us to implement things like Action.print_n_lines(5) and
+#                Action.print_until_match(<regex-to-match>)
+# TODO(jeroend): Update long description (try using rst format - see prompt_toolkit)
