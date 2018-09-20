@@ -2,70 +2,56 @@
 from queue import Queue
 import unittest
 
-from more_or_less import Action, Output, ActionReader, OutputAborted
+from more_or_less import OutputAborted, PageBuilder, PageOfHeight
 import more_or_less
 
 
 _big_page = 1000
 
 
-class OutputDummy(Output):
-
-    def __init__(self):
-        self.output = []
-
-    def print(self, text):
-        self.output.append(text)
-
-    def add_action(self, action):
-        self.output.append(action)
-
-
-class ActionReaderMock(ActionReader):
-    '''
-        Mock that returns a given action but also tells an observer what it returned
-    '''
-
-    def __init__(self, action=Action.print_next_line, observer=None):
-        self.action = action
-        self.observer = observer
-
-    def get_next(self):
-        self.observer.add_action(self.action)
-        return self.action
-
-
 class TestUtil(unittest.TestCase):
 
     def setUp(self):
-        self.output = OutputDummy()
+        self._page_builder = None
 
-    def paginate(self, input, output=None, action=Action.print_next_page, page_height=_big_page, asynchronous=False):
-        # Wrapper around paginate that adds some defaults that are handier for the tests.
-        output = output or self.output
+    def paginate(self, input, page_builder=None, page_height=_big_page, asynchronous=False):
+        self._page_builder = page_builder or PageBuilderMock(page_height)
+
         return more_or_less.paginate(
             input=input,
-            output=output,
-            action_reader=ActionReaderMock(action=action, observer=output),
-            page_height=page_height,
+            page_builder=self._page_builder,
             asynchronous=asynchronous,
         )
+
+    @property
+    def output(self):
+        return self._page_builder.pages
 
 
 class TestPaginate(TestUtil):
 
-    def test_input_is_passed_to_output(self):
+    def test_input_is_passed_to_first_page(self):
         self.paginate(['first \n', 'second \n'])
 
-        self.assertEqual(['first \n', 'second \n'], self.output.output)
+        self.assertEqual(
+            [
+                FirstPage(['first \n', 'second \n', ])
+            ],
+            self.output
+        )
 
     def test_can_read_input_from_a_queue(self):
         queue = _make_queue('first \n', 'second \n', more_or_less.END_OF_INPUT)
         self.paginate(queue)
 
-        self.assertEqual(['first \n', 'second \n'], self.output.output)
+        self.assertEqual(
+            [
+                FirstPage(['first \n', 'second \n', ])
+            ],
+            self.output
+        )
 
-    def test_action_is_requested_after_a_full_page(self):
+    def test_starts_new_page_if_first_is_full(self):
         self.paginate(
             ['first \n', 'second \n', 'third \n'],
             page_height=2,
@@ -73,14 +59,13 @@ class TestPaginate(TestUtil):
 
         self.assertEqual(
             [
-                'first \n',
-                'second \n',
-                Action.print_next_page,
-                'third \n'
+                FirstPage(['first \n', 'second \n', ]),
+                NextPage(['third \n']),
             ],
-            self.output.output)
+            self.output
+        )
 
-    def test_action_is_requested_after_a_second_full_page(self):
+    def test_starts_new_page_if_second_is_full(self):
         self.paginate(
             ['first \n', 'second \n', 'third \n', 'fourth \n', 'fifth \n'],
             page_height=2,
@@ -88,33 +73,12 @@ class TestPaginate(TestUtil):
 
         self.assertEqual(
             [
-                'first \n',
-                'second \n',
-                Action.print_next_page,
-                'third \n',
-                'fourth \n',
-                Action.print_next_page,
-                'fifth \n',
+                FirstPage(['first \n', 'second \n', ]),
+                NextPage(['third \n', 'fourth \n', ]),
+                NextPage(['fifth \n']),
             ],
-            self.output.output)
-
-    def test__action_reader_returns_print_next_line__prompts_after_one_more_line(self):
-        self.paginate(
-            ['first \n', 'second \n', 'third \n', 'fourth \n'],
-            page_height=2,
-            action=Action.print_next_line,
+            self.output
         )
-
-        self.assertEqual(
-            [
-                'first \n',
-                'second \n',
-                Action.print_next_line,
-                'third \n',
-                Action.print_next_line,
-                'fourth \n',
-            ],
-            self.output.output)
 
     def test__run_asynchronous__returns_controller_that_can_be_joined(self):
         input_queue = Queue()
@@ -131,9 +95,10 @@ class TestPaginate(TestUtil):
 
         self.assertEqual(
             [
-                'first \n',
+                FirstPage(['first \n']),
             ],
-            self.output.output)
+            self.output
+        )
 
     def test__can_not_join_queue_when_input_is_finished(self):
         '''
@@ -166,15 +131,12 @@ class TestPaginate(TestUtil):
             input=['first \nsecond \nthird \n'],
             page_height=2,
         )
-
         self.assertEqual(
             [
-                'first \n',
-                'second \n',
-                Action.print_next_page,
-                'third \n',
+                FirstPage(['first \n', 'second \n']),
+                NextPage(['third \n']),
             ],
-            self.output.output
+            self.output
         )
 
     def test__combines_incomplete_lines(self):
@@ -182,13 +144,11 @@ class TestPaginate(TestUtil):
             input=['first \nthis ', 'is ', 'a ', 'single ', 'line \n'],
             page_height=2,
         )
-
         self.assertEqual(
             [
-                'first \n',
-                'this is a single line \n',
+                FirstPage(['first \n', 'this is a single line \n', ]),
             ],
-            self.output.output
+            self.output
         )
 
     def test__survives_empty_string(self):
@@ -196,12 +156,11 @@ class TestPaginate(TestUtil):
             input=['-->', '', '<-- \n'],
             page_height=2,
         )
-
         self.assertEqual(
             [
-                '--><-- \n',
+                FirstPage(['--><-- \n']),
             ],
-            self.output.output
+            self.output
         )
 
     def test__survives_empty_string_as_first_string(self):
@@ -209,12 +168,11 @@ class TestPaginate(TestUtil):
             input=['', '<-- \n'],
             page_height=2,
         )
-
         self.assertEqual(
             [
-                '<-- \n',
+                FirstPage(['<-- \n']),
             ],
-            self.output.output
+            self.output
         )
 
     def test__flushes_final_incomplete_line(self):
@@ -222,12 +180,11 @@ class TestPaginate(TestUtil):
             input=['this line is incomplete '],
             page_height=2,
         )
-
         self.assertEqual(
             [
-                'this line is incomplete ',
+                FirstPage(['this line is incomplete ']),
             ],
-            self.output.output
+            self.output
         )
 
     def test__queue_flushes_final_incomplete_line(self):
@@ -245,62 +202,23 @@ class TestPaginate(TestUtil):
 
         self.assertEqual(
             [
-                'this line is incomplete ',
+                FirstPage(['this line is incomplete ']),
             ],
-            self.output.output
-        )
-
-    def test_page_height_can_be_a_callable(self):
-        page_height = 2
-
-        def get_page_height():
-            return page_height
-
-        input_queue = Queue()
-        context = self.paginate(
-            input_queue,
-            page_height=get_page_height,
-            asynchronous=True,
-        )
-
-        input_queue.put('first \n')
-        input_queue.put('second \n')
-        input_queue.put('third \n')  # This call will prompt the more prompt
-
-        page_height = 1
-        input_queue.put('fourth \n')  # This call will prompt the more prompt again
-        input_queue.put(more_or_less.END_OF_INPUT)
-
-        context.join(timeout=1)
-
-        self.assertEqual(
-            [
-                'first \n',
-                'second \n',
-                Action.print_next_page,
-                'third \n',
-                Action.print_next_page,
-                'fourth \n',
-            ],
-            self.output.output
+            self.output
         )
 
     def test_raises_output_aborted_exception_on_abort(self):
+
+        class AbortingPageBuilder(PageBuilderMock):
+
+            def build_next_page(self):
+                raise OutputAborted()
+
         with self.assertRaises(OutputAborted):
             self.paginate(
                 ['first \n', 'second \n', 'after the abort message \n'],
-                page_height=2,
-                action=Action.abort,
+                page_builder=AbortingPageBuilder(page_height=2),
             )
-
-        self.assertEqual(
-            [
-                'first \n',
-                'second \n',
-                Action.abort,
-            ],
-            self.output.output
-        )
 
 
 def _make_queue(*args):
@@ -308,3 +226,59 @@ def _make_queue(*args):
     for item in args:
         queue.put(item)
     return queue
+
+
+class PageTester(object):
+
+    def __eq__(self, other_page):
+        return (self.name == other_page.name) and (other_page.lines == self.lines)
+
+    def __repr__(self):
+        return '{}Page({})'.format(self.name, self.lines)
+
+
+class PageMock(PageOfHeight, PageTester):
+
+    def __init__(self, name, page_height=None):
+        self.lines = []
+        self.name = name
+        super().__init__(height=page_height, output=self._ListOutput(self.lines))
+
+    class _ListOutput(object):
+        def __init__(self, output_list):
+            self.lines = output_list
+
+        def print(self, text):
+            self.lines.append(text)
+
+
+class FirstPage(PageTester):
+
+    def __init__(self, lines):
+        self.lines = lines
+        self.name = 'First'
+
+
+class NextPage(PageTester):
+
+    def __init__(self, lines):
+        self.lines = lines
+        self.name = 'Next'
+
+
+class PageBuilderMock(PageBuilder):
+
+    def __init__(self, page_height):
+        self.pages = []
+        self._page_height = page_height
+
+    def build_first_page(self):
+        return self._build_page('First')
+
+    def build_next_page(self):
+        return self._build_page('Next')
+
+    def _build_page(self, name):
+        page = PageMock(name=name, page_height=self._page_height)
+        self.pages.append(page)
+        return page

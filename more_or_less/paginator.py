@@ -1,6 +1,4 @@
 #!python
-from abc import ABC, abstractmethod
-import enum
 import queue
 import threading
 
@@ -9,18 +7,23 @@ import threading
 END_OF_INPUT = None
 
 
-def paginate(input, output=None, action_reader=None, page_height=None, asynchronous=False):
+def paginate(input, page_builder, asynchronous=False):
     '''
         Paginates the input, similar to how 'more' works in bash.
 
-        Input lines is read from 'input',
-        and forwarded to 'output' until we hit the 'page_height'.
-        At that point, 'action_reader' is contacted to ask how to continue.
+        Sends input lines to the pages returned by page_builder.
+        When a page is full, a new page is created.
 
-        TODO(jeroend) implement the defaults!
-        If 'output' is missing, will print to 'stdout'.
-        If 'action_reader' is missing, this will display a prompt asking the user for input.
-        If 'page_height' is missing, this will use the height of the current terminal window.
+        TODO(jeroend) implement the default page_builder (to behave like 'more')!
+
+        Pseudo-logic:
+        -------------
+
+        page = page_builder.build_first_page()
+        for line in <input-lines>:
+            if page.is_full():
+                page = page_builder.build_next_page()
+            page.add_line(line)
 
         Arguments:
         ----------
@@ -29,30 +32,18 @@ def paginate(input, output=None, action_reader=None, page_height=None, asynchron
             The input text that should be paginated.
             This must either be an iterable over text (e.g. a list or a file), or an instance of queue.Queue.
 
+            It is not required that each returned string is a complete line. 
+            The paginator will combine incomplete lines until a '\n' is encountered.
+
             If it is a queue.Queue, you must pass 'END_OF_INPUT' into the queue when no more input is expected.
             This will flush the final incomplete line (if any) to the output.
             Note that you can NOT use queue.join() to detect all input has been processed
             (as that just raises issues if the user decides to abort the output halfway through).
             Instead, if you use 'asynchronous=True' you can join the returned context.
 
-        output: 
-            The object that will receive all the output lines.
-            Must follow the API described by the 'Output' object (but must not necessary inherit from this base-class).
-            Note that a file can be used as output.
-
-            The more_or_less will start by sending enough input lines to the output to fill the page.
-            After that no lines will be sent until the action_reader tells us to continue.
-
-        page_height: 
-            The number of lines that will be sent to 'output' before asking the action_reader what to do next.
-            This must either be a number or a callable that returns the height of the current page.
-
-        action_reader: 
-            This object is contacted when a page is full to stop the output and ask the user when to continue.
-            No more output lines are printed until the action_reader returns the 'Action' to take.
-
-            Must follow the API described by the 'ActionReader' object 
-            (but must not necessary inherit from this base-class)
+        page_builder: 
+            The object that will create the output pages whenever a page is full.
+            Must be an instance of 'PageBuilder'.
 
         asynchronous: 
             If true the 'paginate' call will return instantly and run asynchronously.
@@ -76,91 +67,37 @@ def paginate(input, output=None, action_reader=None, page_height=None, asynchron
             target=paginate,
             kwargs={
                 'input': input,
-                'output': output,
-                'action_reader': action_reader,
-                'page_height': page_height,
+                'page_builder': page_builder,
                 'asynchronous': False,
             },
         )
         thread.start()
         return thread
 
-    paginator = Paginator(output, action_reader, page_height)
+    paginator = Paginator(page_builder)
     if isinstance(input, queue.Queue):
         paginator.paginate_from_queue(input)
     else:
         paginator.paginate(input)
 
 
-class OutputAborted(Exception):
-    '''
-        Exception raised when the more_or_less receives 'Action.abort' from the action-reader.
-    '''
-
-
-class Output(ABC):
-    '''
-        Example API of what is expected from the 'output' object.
-        This does not mean it must inherit from this.
-
-        Note that any 'file' object matches this API,
-        so files can natively be used as output.
-    '''
-
-    @abstractmethod
-    def print(self, text):
-        pass
-
-
-class Action(enum.Enum):
-    '''
-        Enum indicating what to do when a page is full.
-    '''
-
-    print_next_page = enum.auto()
-    # print a single line, then ask for the next action
-    print_next_line = enum.auto()
-    # stop printing any output.
-    abort = enum.auto()
-
-
-class ActionReader(ABC):
-    '''
-        Example API of what is expected from the 'action_reader' object.
-        This does not mean it must inherit from this.
-
-        'get_next' will be called when a page is full,
-        and it should return an instance of 'Action' indicating what to do next.
-    '''
-
-    @abstractmethod
-    def get_next(self):
-        pass
-
-
 class Paginator(object):
     '''
         Paginates given input text, similar to how 'more' works in bash.
 
-        See help of 'paginate' for a more detailed description of output/action_reader and page_height.
+        See help of 'paginate' for a more detailed description of the behavior.
 
         There are 3 ways to send input text:
             - pass an iterable to self.paginate.
             - pass a queue to self.paginate_from_queue.
             - call 'add_text' repeatedly until all text has been sent in, then call 'flush_incomplete_line'.
-
-        In all cases the calls will block until the input has been forwarded to output,
-        meaning if the action_reader never returns these calls will block forever.
     '''
 
-    def __init__(self, output, action_reader, page_height):
-        self._output = output
-        self._action_reader = action_reader
-        self._get_page_height = _make_callable(page_height)
-        self._remaining_lines = None
+    def __init__(self, page_builder):
+        self._page_builder = page_builder
         self._lines = _LineCollector()
 
-        self.start_new_page()
+        self._page = self._page_builder.build_first_page()
 
     def paginate(self, iterable):
         '''
@@ -205,31 +142,16 @@ class Paginator(object):
             self._paginate_and_print_text(self._lines.pop_incomplete_line())
 
     def _paginate_and_print_text(self, text):
-        if self._is_page_full():
-            self._prompt_for_action()
+        if self._page.is_full():
+            self._start_new_page()
         self._output_text(text)
 
-    def _is_page_full(self):
-        return self._remaining_lines == 0
-
-    def _prompt_for_action(self):
-        action = self._action_reader.get_next()
-
-        if action == Action.print_next_line:
-            self.start_new_page(page_size=1)
-        elif action == Action.print_next_page:
-            self.start_new_page()
-        elif action == Action.abort:
-            raise OutputAborted()
-        else:
-            assert False, "action_reader should return an instance of 'Action' but got {}".format(action)
-
-    def start_new_page(self, page_size=None):
-        self._remaining_lines = page_size or self._get_page_height()
+    def _start_new_page(self):
+        self._page.flush()
+        self._page = self._page_builder.build_next_page()
 
     def _output_text(self, text):
-        self._output.print(text)
-        self._remaining_lines = self._remaining_lines - 1
+        self._page.add_line(text)
 
 
 class _LineCollector(object):

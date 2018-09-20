@@ -1,7 +1,4 @@
-# TODO(jeroend): Support the defaults for output/action_reader/page_height
-# TODO(jeroend): Make 'Action' an actual class, and have abort/print_next_page/... return class instances.
-#                Then, this returned instance should do the selection whether a line should be printed or not.
-#                This will allow us to implement things like Action.print_n_lines(5) and
-#                Action.print_until_match(<regex-to-match>)
+# TODO(jeroend): Support the default PageBuilder that behaves like 'more'
 # TODO(jeroend): Update long description (try using rst format - see prompt_toolkit)
 # TODO(jeroend): Add example(s) (more.py)
+# TODO(jeroend): Add SearchPage that continues until a search text is encountered in the output
