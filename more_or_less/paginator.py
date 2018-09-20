@@ -135,7 +135,7 @@ class Paginator(object):
         self._lines.add(input_text)
 
         for line in self._lines.pop_complete_lines():
-            self._paginate_and_print_text(line + '\n')
+            self._paginate_and_print_text(line)
 
     def flush_incomplete_line(self):
         if len(self._lines.incomplete_line):
@@ -193,19 +193,19 @@ class _LineCollector(object):
             self.incomplete_line = ''
 
     def _split_lines(self, text):
-        lines = text.splitlines()
+        lines = text.splitlines(True)
 
-        if text.endswith('\n'):
-            complete_lines = lines
-            incomplete_line = ''
-        elif lines:
+        if self._has_incomplete_line(lines):
             complete_lines = lines[:-1]
             incomplete_line = lines[-1]
         else:
-            complete_lines = []
+            complete_lines = lines
             incomplete_line = ''
 
         return (complete_lines, incomplete_line)
+
+    def _has_incomplete_line(self, lines):
+        return len(lines) and not lines[-1].endswith('\n')
 
 
 def _make_callable(value):
