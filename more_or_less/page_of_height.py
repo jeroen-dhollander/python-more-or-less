@@ -17,4 +17,4 @@ class PageOfHeight(Page):
 
     def add_line(self, line):
         self._remaining_lines = self._remaining_lines - 1
-        self._output.print(line)
+        self._output.write(line)

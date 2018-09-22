@@ -1,9 +1,8 @@
 #!python
-from queue import Queue
-import unittest
-
 from more_or_less import OutputAborted, PageBuilder, PageOfHeight
 import more_or_less
+from queue import Queue
+import unittest
 
 
 _big_page = 1000
@@ -248,7 +247,7 @@ class PageMock(PageOfHeight, PageTester):
         def __init__(self, output_list):
             self.lines = output_list
 
-        def print(self, text):
+        def write(self, text):
             self.lines.append(text)
 
 

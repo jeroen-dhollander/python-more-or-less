@@ -11,5 +11,5 @@ class Output(ABC):
     '''
 
     @abstractmethod
-    def print(self, text):
+    def write(self, text):
         pass
