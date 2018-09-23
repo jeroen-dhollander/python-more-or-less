@@ -19,3 +19,6 @@ class PageOfHeight(Page):
     def add_line(self, line):
         self._remaining_lines = self._remaining_lines - 1
         self._output.write(line)
+
+    def flush(self):
+        self._output.flush()

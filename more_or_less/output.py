@@ -13,3 +13,7 @@ class Output(ABC):
     @abstractmethod
     def write(self, text):
         pass
+
+    @abstractmethod
+    def flush(self):
+        pass

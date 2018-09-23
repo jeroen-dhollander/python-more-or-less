@@ -24,6 +24,7 @@ def paginate(input, page_builder=None, asynchronous=False):
         page = page_builder.build_first_page()
         for line in <input-lines>:
             if page.is_full():
+                page.flush()
                 page = page_builder.build_next_page()
             page.add_line(line)
 
@@ -143,6 +144,7 @@ class Paginator(object):
     def flush_incomplete_line(self):
         if len(self._lines.incomplete_line):
             self._paginate_and_print_text(self._lines.pop_incomplete_line())
+        self._page.flush()
 
     def _paginate_and_print_text(self, text):
         if self._page.is_full():

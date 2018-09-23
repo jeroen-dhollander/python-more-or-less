@@ -1,6 +1,5 @@
 #!python
-from more_or_less import OUTPUT_STOPPED, PageBuilder, PageOfHeight, StopOutput
-from more_or_less.paginator import Paginator
+from more_or_less import OUTPUT_STOPPED, PageBuilder, PageOfHeight, StopOutput, Output, Paginator
 from queue import Queue
 import more_or_less
 import unittest
@@ -25,6 +24,14 @@ class TestUtil(unittest.TestCase):
 
     @property
     def output(self):
+        return self._page_builder.pages
+
+    @property
+    def current_page(self):
+        return self._page_builder.pages[-1]
+
+    @property
+    def pages(self):
         return self._page_builder.pages
 
 
@@ -243,6 +250,19 @@ class TestPaginate(TestUtil):
         self.assertIsNot(OUTPUT_STOPPED, paginator.add_text('first \n'))
         self.assertIs(OUTPUT_STOPPED, paginator.add_text('text after output is stopped \n'))
 
+    def test_flushes_completed_pages_when_they_are_full(self):
+        self.paginate(['first page \n', 'second page'], page_height=1, asynchronous=True)
+
+        first_page = self.pages[0]
+
+        self.assertEqual(1, first_page.flush_call_count)
+
+    def test_flushes_final_incomplete_page_when_input_is_done(self):
+        self.paginate(['first page \n', 'second page\n'], page_height=1, asynchronous=True)
+
+        second_page = self.pages[1]
+        self.assertEqual(1, second_page.flush_call_count)
+
 
 def _make_queue(*args):
     queue = Queue()
@@ -266,13 +286,20 @@ class PageMock(PageOfHeight, PageTester):
         self.lines = []
         self.name = name
         super().__init__(height=page_height, output=self._ListOutput(self.lines))
+        self.flush_call_count = 0
 
-    class _ListOutput(object):
+    class _ListOutput(Output):
         def __init__(self, output_list):
             self.lines = output_list
 
         def write(self, text):
             self.lines.append(text)
+
+        def flush(self):
+            pass
+
+    def flush(self):
+        self.flush_call_count = self.flush_call_count + 1
 
 
 class FirstPage(PageTester):
