@@ -1,5 +1,6 @@
 #!python
 from .fixed_size_screen import FixedSizeScreen
+from .more_action_handlers import add_more_action
 from .output import Output
 from .page import Page
 from .page_builder import PageBuilder, StopOutput
@@ -8,6 +9,7 @@ from .paginator import Paginator, paginate, END_OF_INPUT, OUTPUT_STOPPED
 
 
 __all__ = [
+    add_more_action,
     END_OF_INPUT,
     FixedSizeScreen,
     OUTPUT_STOPPED,

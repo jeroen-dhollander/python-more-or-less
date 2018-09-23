@@ -2,5 +2,4 @@
 # TODO(jeroend): Add example(s) (more.py)
 # TODO(jeroend): Add SearchPage that continues until a search text is encountered in the output. Controls are '/text' and then 'n'
 
-# TODO(jeroend): Make MorePageBuilder extendable by introducing a add_more_action(xyz) method
 # TODO(jeroend): Support 10<enter>

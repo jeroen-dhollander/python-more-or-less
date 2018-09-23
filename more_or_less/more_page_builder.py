@@ -1,3 +1,4 @@
+from . import more_action_handlers
 from .page_builder import PageBuilder, StopOutput
 from .page_of_height import PageOfHeight
 from .terminal_input import TerminalInput
@@ -28,8 +29,10 @@ class MorePageBuilder(PageBuilder):
         self._output = output or sys.stdout
         self._input = input or TerminalInput()
 
+        self._action_handlers = more_action_handlers.build_dictionary()
+
     def build_first_page(self):
-        return PageOfHeight(height=self._get_page_height(), output=self._output)
+        return PageOfHeight(height=self.get_page_height(), output=self._output)
 
     def build_next_page(self):
         try:
@@ -39,21 +42,18 @@ class MorePageBuilder(PageBuilder):
             raise StopOutput
 
     def _try_to_build_next_page(self):
-        char = self._input.get_character('--More--')
+        while True:
+            key_pressed = self._input.get_character('--More--')
+            if key_pressed in self._action_handlers:
+                handler = self._action_handlers[key_pressed]
+                return handler.build_page(self, key_pressed=key_pressed)
 
-        if char == ' ':
-            return PageOfHeight(height=self._get_page_height(), output=self._output)
-        if char in ['\r', '\n']:
-            return PageOfHeight(height=1, output=self._output)
-        if char in ['q', 'Q']:
-            raise StopOutput()
-
-        return self._try_to_build_next_page()
-        # TODO(jeroend): Do not recurse
-
-    def _get_page_height(self):
+    def get_page_height(self):
         height_reserved_for_more_prompt = 1
         return self._screen_dimensions.get_height() - height_reserved_for_more_prompt
+
+    def get_output(self):
+        return self._output
 
 # TODO(jeroen): Catch KeyboardInterrupt (ctrl-c)
 # TODO(jeroen): Support help ('h')
