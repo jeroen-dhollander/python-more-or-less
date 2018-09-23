@@ -104,6 +104,58 @@ class TestMorePageBuilder(unittest.TestCase):
 
         self.assertEqual(4, input.get_character.call_count)
 
+    def test_user_can_enter_count_before_enter(self):
+        input = Mock(Input)
+        builder = self.get_more_page_builder(input=input)
+
+        input.get_character.side_effect = ['5', '\n']
+        page = builder.build_next_page()
+
+        self.assertIsPageOfHeight(page, 5)
+
+    def test_count_becomes_the_new_default_for_enter(self):
+        input = Mock(Input)
+        builder = self.get_more_page_builder(input=input)
+
+        input.get_character.side_effect = ['5', '\n']
+        builder.build_next_page()
+
+        input.get_character.side_effect = ['\n']
+        second_page = builder.build_next_page()
+
+        self.assertIsPageOfHeight(second_page, 5)
+
+    def test_can_specify_count_bigger_than_10(self):
+        input = Mock(Input)
+        builder = self.get_more_page_builder(input=input)
+
+        input.get_character.side_effect = ['5', '0', '0', '\n']
+        page = builder.build_next_page()
+
+        self.assertIsPageOfHeight(page, 500)
+
+    def test_user_can_enter_count_before_space(self):
+        input = Mock(Input)
+        builder = self.get_more_page_builder(input=input)
+
+        input.get_character.side_effect = ['5', ' ']
+        page = builder.build_next_page()
+
+        self.assertIsPageOfHeight(page, 5)
+
+    def test_count_does_not_become_the_new_default_for_space(self):
+        input = Mock(Input)
+        screen_height = 666
+        builder = self.get_more_page_builder(input=input, screen_height=screen_height)
+
+        input.get_character.side_effect = ['5', ' ']
+        builder.build_next_page()
+
+        input.get_character.side_effect = [' ']
+        second_page = builder.build_next_page()
+
+        self.assertIsFullscreenPage(second_page, screen_height)
+
 
 class OutputMock(object):
 
