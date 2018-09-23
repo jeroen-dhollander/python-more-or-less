@@ -1,8 +1,9 @@
 #!python
-from more_or_less import OutputAborted, PageOfHeight
+from more_or_less import PageOfHeight
 from more_or_less.fixed_size_screen import FixedSizeScreen
 from more_or_less.input import Input
 from more_or_less.more_page_builder import MorePageBuilder
+from more_or_less.page_builder import StopOutput
 from unittest.mock import Mock
 import unittest
 
@@ -73,7 +74,7 @@ class TestMorePageBuilder(unittest.TestCase):
         builder = self.get_more_page_builder(input=input)
 
         input.get_character.return_value = 'q'
-        with self.assertRaises(OutputAborted):
+        with self.assertRaises(StopOutput):
             builder.build_next_page()
 
     def test_stops_output_if_user_presses_Q(self):
@@ -81,7 +82,7 @@ class TestMorePageBuilder(unittest.TestCase):
         builder = self.get_more_page_builder(input=input)
 
         input.get_character.return_value = 'Q'
-        with self.assertRaises(OutputAborted):
+        with self.assertRaises(StopOutput):
             builder.build_next_page()
 
     def test_ignores_unexpected_user_input(self):

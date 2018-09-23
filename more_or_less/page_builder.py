@@ -1,6 +1,12 @@
 from abc import ABC, abstractmethod
 
 
+class StopOutput(Exception):
+    '''
+        Exception raised to indicate there is no next page.
+    '''
+
+
 class PageBuilder(ABC):
     '''
         Builds the output pages (of type Page) used in the paginator.
@@ -18,6 +24,6 @@ class PageBuilder(ABC):
     @abstractmethod
     def build_next_page(self):
         '''
-            Raises 'OutputAborted' exception if no next page can/should be created.
+            raise StopOutput to indicate there is no next page
         '''
         pass

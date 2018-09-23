@@ -1,8 +1,7 @@
-from more_or_less.output_aborted import OutputAborted
-from more_or_less.page_builder import PageBuilder
-from more_or_less.page_of_height import PageOfHeight
-from more_or_less.terminal_input import TerminalInput
-from more_or_less.terminal_screen import TerminalScreen
+from .page_builder import PageBuilder, StopOutput
+from .page_of_height import PageOfHeight
+from .terminal_input import TerminalInput
+from .terminal_screen import TerminalScreen
 import sys
 
 
@@ -40,7 +39,7 @@ class MorePageBuilder(PageBuilder):
         if char in ['\r', '\n']:
             return PageOfHeight(height=1, output=self._output)
         if char in ['q', 'Q']:
-            raise OutputAborted()
+            raise StopOutput()
 
         return self.build_next_page()
         # TODO(jeroend): Do not recurse

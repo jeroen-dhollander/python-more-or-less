@@ -1,5 +1,6 @@
 #!python
-from more_or_less import OutputAborted, PageBuilder, PageOfHeight
+from more_or_less import OUTPUT_STOPPED, PageBuilder, PageOfHeight, StopOutput
+from more_or_less.paginator import Paginator
 from queue import Queue
 import more_or_less
 import unittest
@@ -206,18 +207,41 @@ class TestPaginate(TestUtil):
             self.output
         )
 
-    def test_raises_output_aborted_exception_on_abort(self):
+    def test_stops_output_when_page_builder_raises_StopOutput(self):
+        self.paginate(
+            ['first \n', 'second \n', 'after the abort - SHOULD NOT BE PRINTED \n'],
+            page_builder=StopOutputPageBuilder(page_height=2),
+        )
 
-        class AbortingPageBuilder(PageBuilderMock):
+        self.assertEqual(
+            [
+                FirstPage([
+                    'first \n',
+                    'second \n',
+                ])
+            ],
+            self.output
+        )
 
-            def build_next_page(self):
-                raise OutputAborted()
+    def test_returns_OUTPUT_STOPPED_when_page_builder_raises_StopOutput(self):
+        result = self.paginate(
+            ['first \n', 'second \n', 'after the abort \n'],
+            page_builder=StopOutputPageBuilder(page_height=2),
+        )
+        self.assertEqual(OUTPUT_STOPPED, result)
 
-        with self.assertRaises(OutputAborted):
-            self.paginate(
-                ['first \n', 'second \n', 'after the abort message \n'],
-                page_builder=AbortingPageBuilder(page_height=2),
-            )
+    def test_returns_OUTPUT_STOPPED_when_page_builder_raises_StopOutput__for_queue(self):
+        result = self.paginate(
+            _make_queue('first \n', 'second \n', 'after the abort \n'),
+            page_builder=StopOutputPageBuilder(page_height=2),
+        )
+        self.assertEqual(OUTPUT_STOPPED, result)
+
+    def test_add_text_returns_OUTPUT_STOPPED_when_page_builder_raises_StopOutput(self):
+        paginator = Paginator(StopOutputPageBuilder(page_height=1))
+
+        self.assertIsNot(OUTPUT_STOPPED, paginator.add_text('first \n'))
+        self.assertIs(OUTPUT_STOPPED, paginator.add_text('text after output is stopped \n'))
 
 
 def _make_queue(*args):
@@ -281,3 +305,9 @@ class PageBuilderMock(PageBuilder):
         page = PageMock(name=name, page_height=self._page_height)
         self.pages.append(page)
         return page
+
+
+class StopOutputPageBuilder(PageBuilderMock):
+
+    def build_next_page(self):
+        raise StopOutput()

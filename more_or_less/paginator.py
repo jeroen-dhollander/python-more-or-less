@@ -1,12 +1,14 @@
 #!python
+from .more_page_builder import MorePageBuilder
+from more_or_less.page_builder import StopOutput
 import queue
 import threading
-
-from .more_page_builder import MorePageBuilder
 
 
 # Signal to send to the input queue when there is no more input
 END_OF_INPUT = None
+# Return code if output was interrupted by the user (e.g. the user pressed ctrl+c)
+OUTPUT_STOPPED = 'OUTPUT_STOPPED'
 
 
 def paginate(input, page_builder=None, asynchronous=False):
@@ -55,13 +57,9 @@ def paginate(input, page_builder=None, asynchronous=False):
         Returns:
         --------
 
-        None if asynchronous is False
         A joinable 'context' if asynchronous is True
+        OUTPUT_STOPPED if the user stopped the output (for example using ctrl+c)
 
-        Raises:
-        -------
-
-        OutputAborted if the action_reader ever returns Action.abort
     '''
 
     if asynchronous:
@@ -79,9 +77,9 @@ def paginate(input, page_builder=None, asynchronous=False):
     page_builder = page_builder or MorePageBuilder()
     paginator = Paginator(page_builder)
     if isinstance(input, queue.Queue):
-        paginator.paginate_from_queue(input)
+        return paginator.paginate_from_queue(input)
     else:
-        paginator.paginate(input)
+        return paginator.paginate(input)
 
 
 class Paginator(object):
@@ -94,6 +92,8 @@ class Paginator(object):
             - pass an iterable to self.paginate.
             - pass a queue to self.paginate_from_queue.
             - call 'add_text' repeatedly until all text has been sent in, then call 'flush_incomplete_line'.
+
+        Each of these methods returns 'OUTPUT_STOPPED' if the user stopped the output (for example using ctrl+c)
     '''
 
     def __init__(self, page_builder):
@@ -106,26 +106,20 @@ class Paginator(object):
         '''
             Iterates over the iterable, and paginates all the text it returns
         '''
-        for text in iterable:
-            self.add_text(text)
+        try:
+            for text in iterable:
+                self._try_to_add_text(text)
 
-        self.flush_incomplete_line()
+            self.flush_incomplete_line()
+        except StopOutput:
+            return OUTPUT_STOPPED
 
     def paginate_from_queue(self, input_queue):
         '''
             Iterates over the queue, and paginates all the text it returns.
             Stops paginating when END_OF_INPUT is encountered on the queue.
-
-            Will signal input_queue.task_done() when finished
         '''
-
-        while True:
-            text = input_queue.get()
-            if text is END_OF_INPUT:
-                self.flush_incomplete_line()
-                return
-
-            self.add_text(text)
+        return self.paginate(QueueIterator(input_queue))
 
     def add_text(self, input_text):
         '''
@@ -135,6 +129,12 @@ class Paginator(object):
             When you're done you must call 'flush_incomplete_line'
             to ensure the last incomplete input line is sent to the output.
         '''
+        try:
+            self._try_to_add_text(input_text)
+        except StopOutput:
+            return OUTPUT_STOPPED
+
+    def _try_to_add_text(self, input_text):
         self._lines.add(input_text)
 
         for line in self._lines.pop_complete_lines():
@@ -216,3 +216,21 @@ def _make_callable(value):
         return lambda: value
     else:
         return value
+
+
+class QueueIterator(object):
+    ''' 
+        Iterates over a queue, until END_OF_INPUT is encountered 
+    '''
+
+    def __init__(self, queue):
+        self._queue = queue
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        text = self._queue.get()
+        if text is END_OF_INPUT:
+            raise StopIteration
+        return text
