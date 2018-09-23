@@ -1,11 +1,9 @@
 #!python
-from more_or_less import OutputAborted, PageBuilder, PageOfHeight
+from more_or_less import OutputAborted, PageOfHeight
 from more_or_less.fixed_size_screen import FixedSizeScreen
 from more_or_less.input import Input
 from more_or_less.more_page_builder import MorePageBuilder
 from unittest.mock import Mock
-import more_or_less
-import sys
 import unittest
 
 
