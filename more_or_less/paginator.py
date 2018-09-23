@@ -2,19 +2,19 @@
 import queue
 import threading
 
+from .more_page_builder import MorePageBuilder
+
 
 # Signal to send to the input queue when there is no more input
 END_OF_INPUT = None
 
 
-def paginate(input, page_builder, asynchronous=False):
+def paginate(input, page_builder=None, asynchronous=False):
     '''
         Paginates the input, similar to how 'more' works in bash.
 
         Sends input lines to the pages returned by page_builder.
         When a page is full, a new page is created.
-
-        TODO(jeroend) implement the default page_builder (to behave like 'more')!
 
         Pseudo-logic:
         -------------
@@ -45,6 +45,8 @@ def paginate(input, page_builder, asynchronous=False):
             The object that will create the output pages whenever a page is full.
             Must be an instance of 'PageBuilder'.
 
+            If not specified, this defaults to MorePageBuilder() (which simply uses stdin/stdout)
+
         asynchronous: 
             If true the 'paginate' call will return instantly and run asynchronously.
             In this case a context is returned on which you can call 'context.join([timeout])' 
@@ -74,6 +76,7 @@ def paginate(input, page_builder, asynchronous=False):
         thread.start()
         return thread
 
+    page_builder = page_builder or MorePageBuilder()
     paginator = Paginator(page_builder)
     if isinstance(input, queue.Queue):
         paginator.paginate_from_queue(input)

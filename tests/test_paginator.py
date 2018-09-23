@@ -1,7 +1,7 @@
 #!python
 from more_or_less import OutputAborted, PageBuilder, PageOfHeight
-import more_or_less
 from queue import Queue
+import more_or_less
 import unittest
 
 

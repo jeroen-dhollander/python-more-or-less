@@ -11,6 +11,7 @@ class PageOfHeight(Page):
     def __init__(self, height, output):
         self._output = output
         self._remaining_lines = height
+        self.height = height
 
     def is_full(self):
         return self._remaining_lines == 0

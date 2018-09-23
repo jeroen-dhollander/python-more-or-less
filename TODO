@@ -2,3 +2,8 @@
 # TODO(jeroend): Update long description (try using rst format - see prompt_toolkit)
 # TODO(jeroend): Add example(s) (more.py)
 # TODO(jeroend): Add SearchPage that continues until a search text is encountered in the output
+
+# TODO(jeroend): Rename OutputAborted to 'StopOutput', and actually catch it and simply return a return-status
+# TODO(jeroend): Make MorePageBuilder extendable by introducing a add_more_action(xyz) method
+# TODO(jeroend): Support 10<enter>
+# TODO(jeroend): Flush output when page is full (to ensure it is properly displayed before the 'more' prompt)
