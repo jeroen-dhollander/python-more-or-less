@@ -85,6 +85,15 @@ class TestMorePageBuilder(unittest.TestCase):
         with self.assertRaises(StopOutput):
             builder.build_next_page()
 
+    def test_stops_output_on_ctrl_c(self):
+        input = Mock(Input)
+        builder = self.get_more_page_builder(input=input)
+
+        input.get_character.side_effect = KeyboardInterrupt
+
+        with self.assertRaises(StopOutput):
+            builder.build_next_page()
+
     def test_ignores_unexpected_user_input(self):
         input = Mock(Input)
         builder = self.get_more_page_builder(input=input)

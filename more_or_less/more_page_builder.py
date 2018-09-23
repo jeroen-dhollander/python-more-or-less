@@ -32,6 +32,13 @@ class MorePageBuilder(PageBuilder):
         return PageOfHeight(height=self._get_page_height(), output=self._output)
 
     def build_next_page(self):
+        try:
+            return self._try_to_build_next_page()
+        except KeyboardInterrupt:
+            # Stop output on ctrl-c
+            raise StopOutput
+
+    def _try_to_build_next_page(self):
         char = self._input.get_character('--More--')
 
         if char == ' ':
@@ -41,7 +48,7 @@ class MorePageBuilder(PageBuilder):
         if char in ['q', 'Q']:
             raise StopOutput()
 
-        return self.build_next_page()
+        return self._try_to_build_next_page()
         # TODO(jeroend): Do not recurse
 
     def _get_page_height(self):
