@@ -16,7 +16,7 @@ class CountPlugin(MorePlugin):
 
     def build_page(self, page_builder, key_pressed, arguments):
         arguments['count'] = self._get_count(page_builder, key_pressed)
-        return page_builder.build_next_page(arguments)
+        return page_builder.build_next_page(arguments=arguments)
 
     def _get_count(self, page_builder, first_key):
 

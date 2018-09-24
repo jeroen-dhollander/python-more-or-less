@@ -8,8 +8,7 @@ from unittest.mock import Mock
 import unittest
 
 
-class TestMorePageBuilder(unittest.TestCase):
-
+class TestUtil(unittest.TestCase):
     def assertIsPageOfHeight(self, page, height):
         self.assertIsInstance(page, PageOfHeight)
         self.assertEqual(height, page.height)
@@ -23,6 +22,9 @@ class TestMorePageBuilder(unittest.TestCase):
             output=output or OutputMock(),
             screen_dimensions=FixedSizeScreen(height=screen_height),
         )
+
+
+class TestMorePageBuilder(TestUtil):
 
     def test_build_first_page_returns_page_of_screen_height_minus_one(self):
         screen_height = 10
@@ -162,7 +164,7 @@ class OutputMock(object):
     def __init__(self):
         self.lines = []
 
-    def print(self, text):
+    def write(self, text):
         self.lines.append(text)
 
 

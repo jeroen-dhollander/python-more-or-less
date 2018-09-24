@@ -21,7 +21,8 @@ class TerminalInput(Input):
         self._output = sys.stdout
 
     def prompt(self, message):
-        raise NotImplemented()
+        self._print_prompt(message)
+        return self._input.readline().rstrip('\n')
 
     def get_character(self, message):
         try:

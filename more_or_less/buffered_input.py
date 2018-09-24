@@ -19,7 +19,7 @@ class BufferedInput(Input):
         self._input = input
 
     def prompt(self, message):
-        self._input.prompt(message)
+        return self._input.prompt(message)
 
     def get_character(self, message):
         if not self._buffered_characters.empty():

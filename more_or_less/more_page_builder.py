@@ -1,8 +1,8 @@
-from more_or_less import more_plugins
 from .page_builder import PageBuilder, StopOutput
 from .page_of_height import PageOfHeight
 from .terminal_input import TerminalInput
 from .terminal_screen import TerminalScreen
+from more_or_less import more_plugins
 from more_or_less.buffered_input import BufferedInput
 import sys
 
@@ -11,6 +11,8 @@ class MorePageBuilder(PageBuilder):
     '''
         A PageBuilder that is intended to work closely the way 'more' works.
         It supports the basic 'more' actions (one-more-page, n-more-lines, find-text).
+
+        Extra actions can be installed as plugins, see more_plugins.py
 
         Constructor Arguments:
         ----------------------
@@ -35,16 +37,19 @@ class MorePageBuilder(PageBuilder):
     def build_first_page(self):
         return PageOfHeight(height=self.get_page_height(), output=self._output)
 
-    def build_next_page(self, arguments=None):
+    def build_next_page(self, message=None, arguments=None):
         try:
-            return self._try_to_build_next_page(arguments or {})
+            return self._try_to_build_next_page(
+                message or self.get_prompt_message(),
+                arguments or {}
+            )
         except KeyboardInterrupt:
             # Stop output on ctrl-c
             raise StopOutput
 
-    def _try_to_build_next_page(self, arguments):
+    def _try_to_build_next_page(self, message, arguments):
         while True:
-            key_pressed = self._input.get_character(self.get_prompt_message())
+            key_pressed = self._input.get_character(message)
             if key_pressed in self._action_handlers:
                 handler = self._action_handlers[key_pressed]
                 return handler.build_page(
@@ -66,5 +71,4 @@ class MorePageBuilder(PageBuilder):
     def get_prompt_message(self):
         return '--More--'
 
-# TODO(jeroen): Catch KeyboardInterrupt (ctrl-c)
 # TODO(jeroen): Support help ('h')
