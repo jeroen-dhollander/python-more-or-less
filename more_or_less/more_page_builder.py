@@ -1,4 +1,4 @@
-from . import more_action_handlers
+from more_or_less import more_plugins
 from .page_builder import PageBuilder, StopOutput
 from .page_of_height import PageOfHeight
 from .terminal_input import TerminalInput
@@ -30,7 +30,7 @@ class MorePageBuilder(PageBuilder):
         self._output = output or sys.stdout
         self._input = BufferedInput(input or TerminalInput())
 
-        self._action_handlers = more_action_handlers.build_dictionary()
+        self._action_handlers = more_plugins.build_dictionary()
 
     def build_first_page(self):
         return PageOfHeight(height=self.get_page_height(), output=self._output)
