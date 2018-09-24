@@ -17,7 +17,7 @@ class TestUtil(unittest.TestCase):
         self._page_builder = page_builder or PageBuilderMock(page_height)
 
         return more_or_less.paginate(
-            input=input,
+            input,
             page_builder=self._page_builder,
             asynchronous=asynchronous,
         )
@@ -249,6 +249,13 @@ class TestPaginate(TestUtil):
 
         self.assertIsNot(OUTPUT_STOPPED, paginator.add_text('first \n'))
         self.assertIs(OUTPUT_STOPPED, paginator.add_text('text after output is stopped \n'))
+
+    def test_flush_incomplete_lines_returns_OUTPUT_STOPPED_when_page_builder_raises_StopOutput(self):
+        paginator = Paginator(StopOutputPageBuilder(page_height=1))
+
+        paginator.add_text('first \n')
+        paginator.add_text('incomplete line that will be flushed later and trigger a StopOutput')
+        self.assertIs(OUTPUT_STOPPED, paginator.flush_incomplete_line())
 
     def test_flushes_completed_pages_when_they_are_full(self):
         self.paginate(['first page \n', 'second page'], page_height=1, asynchronous=True)

@@ -11,7 +11,7 @@ END_OF_INPUT = None
 OUTPUT_STOPPED = 'OUTPUT_STOPPED'
 
 
-def paginate(input, page_builder=None, asynchronous=False):
+def paginate(input_text, page_builder=None, asynchronous=False):
     '''
         Paginates the input, similar to how 'more' works in bash.
 
@@ -31,7 +31,7 @@ def paginate(input, page_builder=None, asynchronous=False):
         Arguments:
         ----------
 
-        input: 
+        input_text: 
             The input text that should be paginated.
             This must either be an iterable over text (e.g. a list or a file), or an instance of queue.Queue.
 
@@ -67,7 +67,7 @@ def paginate(input, page_builder=None, asynchronous=False):
         thread = threading.Thread(
             target=paginate,
             kwargs={
-                'input': input,
+                'input_text': input_text,
                 'page_builder': page_builder,
                 'asynchronous': False,
             },
@@ -77,10 +77,10 @@ def paginate(input, page_builder=None, asynchronous=False):
 
     page_builder = page_builder or MorePageBuilder()
     paginator = Paginator(page_builder)
-    if isinstance(input, queue.Queue):
-        return paginator.paginate_from_queue(input)
+    if isinstance(input_text, queue.Queue):
+        return paginator.paginate_from_queue(input_text)
     else:
-        return paginator.paginate(input)
+        return paginator.paginate(input_text)
 
 
 class Paginator(object):
@@ -142,6 +142,12 @@ class Paginator(object):
             self._paginate_and_print_text(line)
 
     def flush_incomplete_line(self):
+        try:
+            self._try_to_flush_incomplete_line()
+        except StopOutput:
+            return OUTPUT_STOPPED
+
+    def _try_to_flush_incomplete_line(self):
         if len(self._lines.incomplete_line):
             self._paginate_and_print_text(self._lines.pop_incomplete_line())
         self._page.flush()
