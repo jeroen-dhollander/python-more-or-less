@@ -73,4 +73,11 @@ class MorePageBuilder(PageBuilder):
     def get_prompt_message(self):
         return '--More--'
 
-# TODO(jeroen): Support help ('h')
+
+def _build_plugins_dictionary(plugins):
+
+    return {
+        key: plugin
+        for plugin in plugins
+        for key in plugin.keys
+    }
