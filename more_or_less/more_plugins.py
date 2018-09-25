@@ -1,4 +1,5 @@
 from .count_plugin import CountPlugin
+from .help_plugin import HelpPlugin
 from .more_plugin import MorePlugin
 from .one_line_plugin import OneLinePlugin
 from .one_page_plugin import OnePagePlugin
@@ -7,10 +8,11 @@ from .search_plugin import SearchPlugin
 
 __plugins = [
     CountPlugin,
-    OneLinePlugin,
     OnePagePlugin,
+    OneLinePlugin,
     QuitPlugin,
     SearchPlugin,
+    HelpPlugin,
 ]
 
 
@@ -26,19 +28,5 @@ def add_plugin(handler):
     __plugins.append(handler)
 
 
-def build_dictionary():
-    '''
-        Builds the action handlers that define the keys the user can enter
-        at the 'more' prompt, and create the corresponding 'Page'.
-
-        This returns a dictionary {key : handler}.
-        The  same handler can be mapped to multiple keys
-    '''
-    def iter_action_handlers():
-        return (handler() for handler in __plugins)
-
-    return {
-        key: handler
-        for handler in iter_action_handlers()
-        for key in handler.keys
-    }
+def get():
+    return [plugin() for plugin in __plugins]

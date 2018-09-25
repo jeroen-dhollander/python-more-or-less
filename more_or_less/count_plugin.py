@@ -18,6 +18,9 @@ class CountPlugin(MorePlugin):
         arguments['count'] = self._get_count(page_builder, key_pressed)
         return page_builder.build_next_page(arguments=arguments)
 
+    def get_help(self):
+        return []
+
     def _get_count(self, page_builder, first_key):
 
         def iter_digits():

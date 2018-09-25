@@ -18,13 +18,11 @@ class MorePageBuilder(PageBuilder):
         ----------------------
 
         input: [type Input]
+            If not specified we read input from stdin
         output: [type Output]
+            If not specified we print output to stdout
         screen_dimensions: [type ScreenDimensions]
-
-        If no constructor arguments are passed,
-        it defaults to reading input from stdin,
-        printing output to stdout,
-        and using the screen-dimensions of the terminal window.
+            If not specified we use the dimensions of the terminal window
     '''
 
     def __init__(self, input=None, output=None, screen_dimensions=None):
@@ -32,7 +30,8 @@ class MorePageBuilder(PageBuilder):
         self._output = output or sys.stdout
         self._input = BufferedInput(input or TerminalInput())
 
-        self._action_handlers = more_plugins.build_dictionary()
+        self._plugins = more_plugins.get()
+        self._action_handlers = _build_plugins_dictionary(self._plugins)
 
     def build_first_page(self):
         return PageOfHeight(height=self.get_page_height(), output=self._output)
@@ -56,6 +55,9 @@ class MorePageBuilder(PageBuilder):
                     self,
                     key_pressed=key_pressed,
                     arguments=arguments)
+
+    def get_plugins(self):
+        return self._plugins
 
     def get_page_height(self):
         height_reserved_for_more_prompt = 1

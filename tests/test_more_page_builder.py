@@ -3,6 +3,7 @@ from more_or_less import PageOfHeight
 from more_or_less.fixed_size_screen import FixedSizeScreen
 from more_or_less.input import Input
 from more_or_less.more_page_builder import MorePageBuilder
+from more_or_less.output import Output
 from more_or_less.page_builder import StopOutput
 from unittest.mock import Mock
 import unittest
@@ -19,7 +20,7 @@ class TestUtil(unittest.TestCase):
     def get_more_page_builder(self, output=None, input=None, screen_height=1000):
         return MorePageBuilder(
             input=input or Mock(Input),
-            output=output or OutputMock(),
+            output=output or Mock(Output),
             screen_dimensions=FixedSizeScreen(height=screen_height),
         )
 
@@ -157,15 +158,6 @@ class TestMorePageBuilder(TestUtil):
         second_page = builder.build_next_page()
 
         self.assertIsFullscreenPage(second_page, screen_height)
-
-
-class OutputMock(object):
-
-    def __init__(self):
-        self.lines = []
-
-    def write(self, text):
-        self.lines.append(text)
 
 
 def _page_height_for_screen(screen_height):

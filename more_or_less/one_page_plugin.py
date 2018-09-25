@@ -15,3 +15,6 @@ class OnePagePlugin(MorePlugin):
     def build_page(self, page_builder, key_pressed, arguments):
         page_height = arguments.get('count', page_builder.get_page_height())
         return PageOfHeight(height=page_height, output=page_builder.get_output())
+
+    def get_help(self):
+        yield ('<space>', 'Display next k lines of text [current screen size]')

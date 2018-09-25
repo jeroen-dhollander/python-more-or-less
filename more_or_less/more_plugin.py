@@ -34,3 +34,13 @@ class MorePlugin(ABC):
                 with argument {'count': 10}.
         '''
         pass
+
+    @abstractmethod
+    def get_help(self):
+        '''
+            Returns an iterator over 'command', 'help-text' tuples that describe how to use
+            this plugin.
+            Example:
+            yield ('<space>', 'Display next line of text')
+        '''
+        pass

@@ -1,2 +1,5 @@
 # TODO(jeroend): Update long description (try using rst format - see prompt_toolkit)
 # TODO(jeroend): Add example(s) (more.py)
+# TODO(jeroend): Support '=' (show current line number) <-- this might be tricky
+# TODO(jeroend): Support '.' (repeat previous command) <-- this might be tricky
+# TODO(jeroend): Support count in '/' and 'n' (also update help text!)

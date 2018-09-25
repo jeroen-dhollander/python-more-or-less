@@ -1,6 +1,6 @@
 from .more_plugin import MorePlugin
-from more_or_less.page import Page
-from more_or_less.page_of_height import PageOfHeight
+from .page import Page
+from .page_of_height import PageOfHeight
 import re
 
 _NO_PREVIOUS_REGULAR_EXPRESSION = '--No previous regular expression--'
@@ -28,6 +28,10 @@ class SearchPlugin(MorePlugin):
             return self._repeat_last_search(page_builder)
         else:
             assert False, 'Unexpected input key'
+
+    def get_help(self):
+        yield ('/<regular expression>', 'Search for first occurrence of regular expression')
+        yield ('n', 'Search for next occurrence of last regular expression')
 
     def _do_new_search(self, page_builder):
         self._update_pattern(page_builder.get_input())
