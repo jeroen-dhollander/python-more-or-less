@@ -18,6 +18,8 @@ To see the operations available, press ``h`` at the ``--More--`` prompt::
     h or ?                 Display this help text
     -------------------------------------------------------------------------------
 
+How to use this
+===============
 
 All you need to do is call ``paginate`` and pass in your input lines:
 
