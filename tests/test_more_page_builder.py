@@ -5,16 +5,23 @@ from more_or_less.input import Input
 from more_or_less.more_page_builder import MorePageBuilder
 from more_or_less.output import Output
 from more_or_less.page_builder import StopOutput
+from more_or_less.wrapped_page import WrappedPage
 from unittest.mock import Mock
 import unittest
 
 
 class TestUtil(unittest.TestCase):
+
+    def assertIsPageOfType(self, page, page_type):
+        ''' assertIsInstance, but will first strip page-wrappers '''
+        page = _skip_page_wrappers(page)
+        self.assertIsInstance(page, page_type)
+
     def assertIsPageOfHeight(self, page, height):
-        self.assertIsInstance(page, PageOfHeight)
+        self.assertIsPageOfType(page, PageOfHeight)
         self.assertEqual(height, page.height)
 
-    def assertIsFullscreenPage(self, page, screen_height):
+    def assertIsFullscreenPage(self, page, screen_height=1000):
         self.assertIsPageOfHeight(page, _page_height_for_screen(screen_height))
 
     def get_more_page_builder(self, output=None, input=None, plugins=None, screen_height=1000):
@@ -164,3 +171,9 @@ class TestMorePageBuilder(TestUtil):
 def _page_height_for_screen(screen_height):
     height_reserved_for_more_prompt = 1
     return screen_height - height_reserved_for_more_prompt
+
+
+def _skip_page_wrappers(page):
+    while isinstance(page, WrappedPage):
+        page = page.wrapped_page
+    return page

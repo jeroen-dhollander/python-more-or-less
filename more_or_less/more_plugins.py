@@ -1,5 +1,6 @@
 from .count_plugin import CountPlugin
 from .help_plugin import HelpPlugin
+from .line_count_plugin import LineCountPlugin
 from .more_plugin import MorePlugin
 from .one_line_plugin import OneLinePlugin
 from .one_page_plugin import OnePagePlugin
@@ -11,6 +12,7 @@ __plugins = [
     OnePagePlugin,
     OneLinePlugin,
     QuitPlugin,
+    LineCountPlugin,
     SearchPlugin,
     HelpPlugin,
 ]

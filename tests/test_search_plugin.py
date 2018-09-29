@@ -10,11 +10,11 @@ import unittest
 class TestSearchPlugin(TestUtil):
 
     def assertIsSearchPageWithPattern(self, page, pattern):
-        self.assertIsInstance(page, SearchPage)
+        self.assertIsPageOfType(page, SearchPage)
         self.assertEqual(pattern, page.pattern)
 
     def assertIsSearchPageWithMatchCount(self, page, match_count):
-        self.assertIsInstance(page, SearchPage)
+        self.assertIsPageOfType(page, SearchPage)
         self.assertEqual(match_count, page.required_match_count)
 
     def test_creates_search_page_when_pressing_slash(self):
