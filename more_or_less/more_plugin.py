@@ -35,6 +35,18 @@ class MorePlugin(ABC):
         '''
         pass
 
+    def wrap_page(self, page):
+        ''' 
+            Called when a new page is created. 
+            Gives the plugin to return a wrapper page that can be used to modify/register
+            _every_ line, including the ones that are suppressed by other plugins.
+
+            Example usage is counting all the outputted lines.
+
+            Must return a 'Page'. Implementing this method is optional.
+        '''
+        return page
+
     @abstractmethod
     def get_help(self):
         '''

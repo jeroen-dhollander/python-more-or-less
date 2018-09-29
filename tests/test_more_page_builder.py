@@ -17,11 +17,12 @@ class TestUtil(unittest.TestCase):
     def assertIsFullscreenPage(self, page, screen_height):
         self.assertIsPageOfHeight(page, _page_height_for_screen(screen_height))
 
-    def get_more_page_builder(self, output=None, input=None, screen_height=1000):
+    def get_more_page_builder(self, output=None, input=None, plugins=None, screen_height=1000):
         return MorePageBuilder(
             input=input or Mock(Input),
             output=output or Mock(Output),
             screen_dimensions=FixedSizeScreen(height=screen_height),
+            plugins=plugins,
         )
 
 

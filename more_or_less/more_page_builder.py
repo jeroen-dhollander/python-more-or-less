@@ -1,13 +1,14 @@
+from . import more_plugins
+from .buffered_input import BufferedInput
 from .page_builder import PageBuilder, StopOutput
 from .page_of_height import PageOfHeight
+from .page_wrapper import PageWrapper
 from .terminal_input import TerminalInput
 from .terminal_screen import TerminalScreen
-from more_or_less import more_plugins
-from more_or_less.buffered_input import BufferedInput
 import sys
 
 
-class MorePageBuilder(PageBuilder):
+def MorePageBuilder(*args, **kwargs):
     '''
         A PageBuilder that is intended to work closely the way 'more' works.
         It supports the basic 'more' actions (one-more-page, n-more-lines, find-text).
@@ -23,14 +24,20 @@ class MorePageBuilder(PageBuilder):
             If not specified we print output to stdout
         screen_dimensions: [type ScreenDimensions]
             If not specified we use the dimensions of the terminal window
+        plugins: [type list of MorePlugin]
+            The plugins to load. If not specified will fetch all plugins from more_plugins.py
     '''
+    return PageWrapper(_MorePageBuilder(*args, **kwargs))
 
-    def __init__(self, input=None, output=None, screen_dimensions=None):
+
+class _MorePageBuilder(PageBuilder):
+
+    def __init__(self, input=None, output=None, screen_dimensions=None, plugins=None):
         self._screen_dimensions = screen_dimensions or TerminalScreen()
         self._output = output or sys.stdout
         self._input = BufferedInput(input or TerminalInput())
 
-        self._plugins = more_plugins.get()
+        self._plugins = plugins or more_plugins.get()
         self._action_handlers = _build_plugins_dictionary(self._plugins)
 
     def build_first_page(self):
@@ -51,10 +58,7 @@ class MorePageBuilder(PageBuilder):
             key_pressed = self._input.get_character(message)
             if key_pressed in self._action_handlers:
                 handler = self._action_handlers[key_pressed]
-                return handler.build_page(
-                    self,
-                    key_pressed=key_pressed,
-                    arguments=arguments)
+                return handler.build_page(self, key_pressed=key_pressed, arguments=arguments)
 
     def get_plugins(self):
         return self._plugins
