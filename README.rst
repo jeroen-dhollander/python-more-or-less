@@ -13,6 +13,8 @@ To see the operations available, press ``h`` at the ``--More--`` prompt::
     <space>                Display next k lines of text [current screen size]
     <return>               Display next k lines of text [1]*
     q or Q or <interrupt>  Exit from more
+    =                      Display current line number
+    l                      Toggle printing line number on every line [currently disabled]
     /<regular expression>  Search for kth occurrence of the regular expression [1]
     n                      Search for kth occurrence of the last regular expression [1]
     h or ?                 Display this help text
