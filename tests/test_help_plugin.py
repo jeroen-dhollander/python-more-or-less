@@ -20,6 +20,7 @@ class TestHelpPlugin(unittest.TestCase):
         l                      Toggle printing line number on every line [currently disabled]
         /<regular expression>  Search for kth occurrence of the regular expression [1]
         n                      Search for kth occurrence of the last regular expression [1]
+        .                      Repeat previous command
         h or ?                 Display this help text
         -------------------------------------------------------------------------------
     ''')

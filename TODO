@@ -1,6 +1,6 @@
 # TODO(jeroend): Update long description (try using rst format - see prompt_toolkit)
 # TODO(jeroend): Add example(s) (more.py)
-# TODO(jeroend): Support '.' (repeat previous command) <-- this might be tricky
+   - example add plugin (maybe plugin that starts coloring each line on 'c' - 2 plugins: one persistent mode, one a single page)
 
 
 # TODO(jeroend): Use https://travis-ci.org/ to add the 'build-passing' icon to the readme

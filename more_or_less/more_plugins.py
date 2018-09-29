@@ -5,6 +5,7 @@ from .more_plugin import MorePlugin
 from .one_line_plugin import OneLinePlugin
 from .one_page_plugin import OnePagePlugin
 from .quit_plugin import QuitPlugin
+from .repeat_plugin import RepeatPlugin
 from .search_plugin import SearchPlugin
 
 __plugins = [
@@ -14,6 +15,7 @@ __plugins = [
     QuitPlugin,
     LineCountPlugin,
     SearchPlugin,
+    RepeatPlugin,
     HelpPlugin,
 ]
 

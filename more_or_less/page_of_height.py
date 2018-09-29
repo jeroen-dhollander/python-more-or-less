@@ -1,7 +1,8 @@
 from .page import Page
+from .repeatable_mixin import RepeatableMixin
 
 
-class PageOfHeight(Page):
+class PageOfHeight(Page, RepeatableMixin):
     '''
         A page that accepts a given number of lines.
         Every line will be forwarded to the given 'output' object
@@ -22,3 +23,6 @@ class PageOfHeight(Page):
 
     def flush(self):
         self._output.flush()
+
+    def repeat(self):
+        return PageOfHeight(self.height, self._output)

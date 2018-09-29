@@ -53,6 +53,6 @@ class MorePlugin(ABC):
             Returns an iterator over 'command', 'help-text' tuples that describe how to use
             this plugin.
             Example:
-            yield ('<space>', 'Display next line of text')
+            yield (' ', 'Display next line of text')
         '''
         pass

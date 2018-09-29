@@ -1,6 +1,7 @@
 from .more_plugin import MorePlugin
 from .page import Page
 from .page_of_height import PageOfHeight
+from .repeatable_mixin import RepeatableMixin
 import re
 
 _NO_PREVIOUS_REGULAR_EXPRESSION = '--No previous regular expression--'
@@ -63,7 +64,7 @@ class SearchPlugin(MorePlugin):
         self._pattern = input.prompt('/')
 
 
-class SearchPage(Page):
+class SearchPage(Page, RepeatableMixin):
     '''
         A page that suppresses all output until a given search pattern is found.
         After that it displays the passed in page
@@ -94,6 +95,9 @@ class SearchPage(Page):
     def flush(self):
         if self.has_match:
             self.next_page.flush()
+
+    def repeat(self):
+        return SearchPage(self.pattern, self.next_page.repeat(), self.required_match_count)
 
     @property
     def has_match(self):
