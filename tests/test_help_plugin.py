@@ -16,8 +16,8 @@ class TestHelpPlugin(unittest.TestCase):
         <space>                Display next k lines of text [current screen size]
         <return>               Display next k lines of text [1]*
         q or Q or <interrupt>  Exit from more
-        /<regular expression>  Search for first occurrence of regular expression
-        n                      Search for next occurrence of last regular expression
+        /<regular expression>  Search for kth occurrence of the regular expression [1]
+        n                      Search for kth occurrence of the last regular expression [1]
         h or ?                 Display this help text
         -------------------------------------------------------------------------------
     ''')

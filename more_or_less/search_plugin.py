@@ -16,12 +16,15 @@ class SearchPlugin(MorePlugin):
 
     def __init__(self):
         self._pattern = None
+        self._match_count = None
 
     @property
     def keys(self):
         return ['/', 'n']
 
     def build_page(self, page_builder, key_pressed, arguments):
+        self._match_count = arguments.get('count', 1)
+
         if key_pressed == '/':
             return self._do_new_search(page_builder)
         elif key_pressed == 'n':
@@ -30,8 +33,8 @@ class SearchPlugin(MorePlugin):
             assert False, 'Unexpected input key'
 
     def get_help(self):
-        yield ('/<regular expression>', 'Search for first occurrence of regular expression')
-        yield ('n', 'Search for next occurrence of last regular expression')
+        yield ('/<regular expression>', 'Search for kth occurrence of the regular expression [1]')
+        yield ('n', 'Search for kth occurrence of the last regular expression [1]')
 
     def _do_new_search(self, page_builder):
         self._update_pattern(page_builder.get_input())
@@ -48,6 +51,7 @@ class SearchPlugin(MorePlugin):
         return SearchPage(
             pattern=self._pattern,
             next_page=self._create_full_page(page_builder),
+            match_count=self._match_count,
         )
 
     def _create_full_page(self, page_builder):
@@ -65,26 +69,32 @@ class SearchPage(Page):
         After that it displays the passed in page
     '''
 
-    def __init__(self, pattern, next_page):
+    def __init__(self, pattern, next_page, match_count):
         self.pattern = pattern
         self.next_page = next_page
         self._matcher = re.compile(pattern)
-        self._has_match = False
+        self._actual_match_count = 0
+        self.required_match_count = match_count
 
     def is_full(self):
-        if self._has_match:
+        if self.has_match:
             return self.next_page.is_full()
         return False
 
     def add_line(self, line):
         self._match(line)
 
-        if self._has_match:
+        if self.has_match:
             self.next_page.add_line(line)
 
     def _match(self, line):
-        self._has_match = self._has_match or self._matcher.search(line)
+        if self._matcher.search(line):
+            self._actual_match_count = self._actual_match_count + 1
 
     def flush(self):
-        if self._has_match:
+        if self.has_match:
             self.next_page.flush()
+
+    @property
+    def has_match(self):
+        return self._actual_match_count >= self.required_match_count

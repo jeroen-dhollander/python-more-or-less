@@ -13,6 +13,10 @@ class TestSearchPlugin(TestUtil):
         self.assertIsInstance(page, SearchPage)
         self.assertEqual(pattern, page.pattern)
 
+    def assertIsSearchPageWithMatchCount(self, page, match_count):
+        self.assertIsInstance(page, SearchPage)
+        self.assertEqual(match_count, page.required_match_count)
+
     def test_creates_search_page_when_pressing_slash(self):
         input = Mock(Input)
         input.get_character.return_value = '/'
@@ -79,14 +83,56 @@ class TestSearchPlugin(TestUtil):
 
         self.assertIsFullscreenPage(page.next_page, screen_height=screen_height)
 
+    def test_passes_count_1_to_search_page_by_default(self):
+        input = Mock(Input)
+        input.get_character.return_value = '/'
+        input.prompt.side_effect = ['the-pattern']
+        builder = self.get_more_page_builder(input=input)
+
+        page = builder.build_next_page()
+        self.assertIsSearchPageWithMatchCount(page, match_count=1)
+
+    def test_passes_count_to_search_page(self):
+        input = Mock(Input)
+        input.get_character.side_effect = ['5', '/']
+        input.prompt.side_effect = ['the-pattern']
+        builder = self.get_more_page_builder(input=input)
+
+        page = builder.build_next_page()
+        self.assertIsSearchPageWithMatchCount(page, match_count=5)
+
+    def test_n_defaults_to_match_count_1(self):
+        input = Mock(Input)
+        input.get_character.side_effect = ['5', '/']
+        input.prompt.side_effect = ['the-pattern']
+        builder = self.get_more_page_builder(input=input)
+        builder.build_next_page()
+
+        input.get_character.side_effect = ['n']
+        second_page = builder.build_next_page()
+
+        self.assertIsSearchPageWithMatchCount(second_page, match_count=1)
+
+    def test_n_accepts_a_count(self):
+        input = Mock(Input)
+        input.get_character.side_effect = ['/']
+        input.prompt.side_effect = ['the-pattern']
+        builder = self.get_more_page_builder(input=input)
+        builder.build_next_page()
+
+        input.get_character.side_effect = ['7', 'n']
+        second_page = builder.build_next_page()
+
+        self.assertIsSearchPageWithMatchCount(second_page, match_count=7)
+
 
 class TestSearchPage(unittest.TestCase):
 
     def setUp(self):
         self.next_page = Mock(Page)
 
-    def create_search_page(self, pattern=''):
-        return SearchPage(pattern=pattern, next_page=self.next_page)
+    def create_search_page(self, pattern='', match_count=1):
+        return SearchPage(pattern=pattern, next_page=self.next_page, match_count=match_count)
 
     def test_add_line_blackholed_if_it_doesnt_match(self):
         page = self.create_search_page('the-pattern')
@@ -105,6 +151,19 @@ class TestSearchPage(unittest.TestCase):
         self.next_page.add_line.assert_has_calls([
             call('this matches the regex pattern'),
             call('next line'),
+        ])
+
+    def test_must_match_the_provided_number_of_times(self):
+        match_count = 5
+        page = self.create_search_page('the.*pattern', match_count=match_count - 1)
+
+        page.add_line('this matches the regex pattern the 1th time')
+        page.add_line('this matches the regex pattern the 2nd time')
+        page.add_line('this matches the regex pattern the 3rd time')
+        page.add_line('this matches the regex pattern the 4th time')
+        page.add_line('this matches the regex pattern the 5th time')
+        self.next_page.add_line.assert_has_calls([
+            call('this matches the regex pattern the 5th time'),
         ])
 
     def test_is_full_false_initially(self):
