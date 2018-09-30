@@ -32,5 +32,12 @@ def add_plugin(handler):
     __plugins.append(handler)
 
 
+def remove_plugin(handler):
+    '''
+        Removes a MorePlugin class. 
+    '''
+    __plugins.remove(handler)
+
+
 def get():
     return [plugin() for plugin in __plugins]

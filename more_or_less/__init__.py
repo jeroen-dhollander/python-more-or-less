@@ -1,8 +1,9 @@
 from .fixed_size_screen import FixedSizeScreen
 from .input import Input
+from .line_count_plugin import LineCountPlugin
 from .more_page_builder import MorePageBuilder
 from .more_plugin import MorePlugin
-from .more_plugins import add_plugin
+from .more_plugins import add_plugin, remove_plugin
 from .output import Output
 from .page import Page
 from .page_builder import PageBuilder, StopOutput
@@ -17,6 +18,7 @@ __all__ = [
     END_OF_INPUT,
     FixedSizeScreen,
     Input,
+    LineCountPlugin,
     MorePageBuilder,
     MorePlugin,
     OUTPUT_STOPPED,
@@ -31,4 +33,5 @@ __all__ = [
     WrappedPage,
     add_plugin,
     paginate,
+    remove_plugin,
 ]

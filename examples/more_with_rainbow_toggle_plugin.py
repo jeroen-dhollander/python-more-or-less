@@ -12,13 +12,23 @@
     When the page is full, use 'h' to see the options.
 '''
 from examples.more_with_rainbow_page_plugin import rainbowify
-from more_or_less import MorePlugin, WrappedPage
+from more_or_less import LineCountPlugin, MorePlugin, WrappedPage
 import more_or_less
 import sys
 
 
 def main():
     more_or_less.add_plugin(RainbowTogglePlugin)
+
+    # Note: toggles are evaluated in the order they are installed,
+    # So that means that if you enable both rainbowification and line numbers
+    # (press 'r' and 'l'),
+    # The line numbers are not rainbowified.
+    # To overcome that we remove and reinstall the line numbers plugin
+    # Try commenting out the next 2 lines and see the difference if you press 'r' and 'l'.
+    more_or_less.remove_plugin(LineCountPlugin)
+    more_or_less.add_plugin(LineCountPlugin)
+
     more_or_less.paginate(input=sys.stdin)
 
 
