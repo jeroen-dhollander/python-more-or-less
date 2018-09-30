@@ -29,7 +29,7 @@ All you need to do is call ``paginate`` and pass in your input lines:
 
   import more_or_less
 
-  more_or_less.paginate(input=iterator)
+  more_or_less.paginate(input=iterator_or_queue)
 
 This uses your terminal's screen height, and prints the text to ``stdout``.
 
