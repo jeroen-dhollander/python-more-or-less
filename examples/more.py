@@ -11,7 +11,7 @@ import sys
 
 
 def main():
-    more_or_less.paginate(input_text=sys.stdin)
+    more_or_less.paginate(input=sys.stdin)
     # Yes that's all that is required
 
 

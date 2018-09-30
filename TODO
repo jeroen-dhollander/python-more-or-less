@@ -5,5 +5,5 @@
 
 # TODO(jeroend): Use https://travis-ci.org/ to add the 'build-passing' icon to the readme
 
-# TODO(jeroend): Update paginate arguments to comply with the README
 # TODO(jeroend): Document custom input and screen height
+Document 'asynchronous'

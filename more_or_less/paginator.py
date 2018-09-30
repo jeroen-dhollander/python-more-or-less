@@ -1,6 +1,6 @@
 #!python
 from .more_page_builder import MorePageBuilder
-from more_or_less.page_builder import StopOutput
+from .page_builder import StopOutput
 import queue
 import threading
 
@@ -11,12 +11,19 @@ END_OF_INPUT = None
 OUTPUT_STOPPED = 'OUTPUT_STOPPED'
 
 
-def paginate(input_text, page_builder=None, asynchronous=False):
+def paginate(
+        input,
+        output=None,
+        prompt=None,
+        screen_dimensions=None,
+        plugins=None,
+        page_builder=None,
+        asynchronous=False):
     '''
         Paginates the input, similar to how 'more' works in bash.
 
-        Sends input lines to the pages returned by page_builder.
-        When a page is full, a new page is created.
+        Reads from input until the output window is full.
+        Then prompts the user for an action before reading more input.
 
         Pseudo-logic:
         -------------
@@ -31,7 +38,7 @@ def paginate(input_text, page_builder=None, asynchronous=False):
         Arguments:
         ----------
 
-        input_text: 
+        input: [type iterable or Queue]
             The input text that should be paginated.
             This must either be an iterable over text (e.g. a list or a file), or an instance of queue.Queue.
 
@@ -44,16 +51,32 @@ def paginate(input_text, page_builder=None, asynchronous=False):
             (as that just raises issues if the user decides to abort the output halfway through).
             Instead, if you use 'asynchronous=True' you can join the returned context.
 
-        page_builder: 
-            The object that will create the output pages whenever a page is full.
-            Must be an instance of 'PageBuilder'.
+        output: [type Output]
+            If not specified we print output to stdout
 
-            If not specified, this defaults to MorePageBuilder() (which simply uses stdin/stdout)
+        prompt: [type Input]
+            Used when prompting the user for actions.
+            Defaults to reading from stdin.
 
-        asynchronous: 
+        screen_dimensions: [type ScreenDimensions]
+            Used to know the height of the output window 
+            (which is used to decide how many lines to print before we consider a page 'full').
+            Defaults to using the dimensions of the terminal window.
+
+        plugins: [type list of MorePlugin]
+            The plugins to load. These plugins decide what actions are available on the 'more' prompt.
+            If not specified will fetch all plugins from more_plugins.py
+
+        asynchronous: [type bool] 
             If true the 'paginate' call will return instantly and run asynchronously.
             In this case a context is returned on which you can call 'context.join([timeout])' 
             to block until all lines are sent to the output.
+
+        page_builder: [type PageBuilder]
+            The object that will create the output pages whenever a page is full.
+            Must be an instance of 'PageBuilder'.
+            If specified we ignore the values of output, prompt, screen_dimensions and plugins.
+
 
         Returns:
         --------
@@ -63,11 +86,17 @@ def paginate(input_text, page_builder=None, asynchronous=False):
 
     '''
 
+    page_builder = page_builder or MorePageBuilder(
+        input=prompt,
+        output=output,
+        screen_dimensions=screen_dimensions,
+        plugins=plugins)
+
     if asynchronous:
         thread = threading.Thread(
             target=paginate,
             kwargs={
-                'input_text': input_text,
+                'input': input,
                 'page_builder': page_builder,
                 'asynchronous': False,
             },
@@ -75,12 +104,11 @@ def paginate(input_text, page_builder=None, asynchronous=False):
         thread.start()
         return thread
 
-    page_builder = page_builder or MorePageBuilder()
     paginator = Paginator(page_builder)
-    if isinstance(input_text, queue.Queue):
-        return paginator.paginate_from_queue(input_text)
+    if isinstance(input, queue.Queue):
+        return paginator.paginate_from_queue(input)
     else:
-        return paginator.paginate(input_text)
+        return paginator.paginate(input)
 
 
 class Paginator(object):
