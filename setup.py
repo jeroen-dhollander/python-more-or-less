@@ -1,12 +1,12 @@
 #!python
 from setuptools import setup, find_packages
 
-with open("README.md", "r") as fh:
+with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setup(
     name='more-or-less',
-    version="0.1.4",
+    version="0.1.5",
     description="Library for adding 'more' like paging functionality to your Python application",
     long_description=long_description,
     author="Jeroen Dhollander",
