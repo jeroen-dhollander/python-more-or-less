@@ -10,7 +10,7 @@ class PageOfHeight(Page, RepeatableMixin):
     '''
 
     def __init__(self, height, output):
-        self._output = output
+        self.output = output
         self._remaining_lines = height
         self.height = height
 
@@ -19,10 +19,10 @@ class PageOfHeight(Page, RepeatableMixin):
 
     def add_line(self, line):
         self._remaining_lines = self._remaining_lines - 1
-        self._output.write(line)
+        self.output.write(line)
 
     def flush(self):
-        self._output.flush()
+        self.output.flush()
 
     def repeat(self):
-        return PageOfHeight(self.height, self._output)
+        return PageOfHeight(self.height, self.output)

@@ -7,3 +7,5 @@
 
 # TODO(jeroend): Document custom input and screen height
 Document 'asynchronous'
+
+Change 'keys' to 'get_keys' (as even I keep messing it up)
