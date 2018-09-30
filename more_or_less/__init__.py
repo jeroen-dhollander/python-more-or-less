@@ -10,6 +10,7 @@ from .page_of_height import PageOfHeight
 from .paginator import Paginator, paginate, END_OF_INPUT, OUTPUT_STOPPED
 from .repeatable_mixin import RepeatableMixin
 from .screen_dimensions import ScreenDimensions
+from .wrapped_page import WrappedPage
 
 
 __all__ = [
@@ -27,6 +28,7 @@ __all__ = [
     RepeatableMixin,
     ScreenDimensions,
     StopOutput,
+    WrappedPage,
     add_plugin,
     paginate,
 ]
