@@ -65,7 +65,7 @@ This can be any object that has a ``write`` and ``flush`` method
           pass
 
   def paginate(iterator):
-      more_or_less.paginate(input=iterator, myCustomOutput())
+      more_or_less.paginate(input=iterator,  output=myCustomOutput())
 
 To use another screen height than your terminal session, pass in a ``ScreenDimensions`` object, like the built-in ``FixedSizeScreen``:
 
