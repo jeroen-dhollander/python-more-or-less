@@ -19,8 +19,7 @@ class SearchPlugin(MorePlugin):
         self._pattern = None
         self._match_count = None
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return ['/', 'n']
 
     def build_page(self, page_builder, key_pressed, arguments):

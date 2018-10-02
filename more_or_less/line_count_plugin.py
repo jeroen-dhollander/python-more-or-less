@@ -12,8 +12,7 @@ class LineCountPlugin(MorePlugin):
         self.line_numbers_enabled = False
         self.line_count = 0
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return ['=', 'l', 'L']
 
     def get_help(self):

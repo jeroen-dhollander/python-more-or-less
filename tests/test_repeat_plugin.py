@@ -88,8 +88,8 @@ class UnrepeatablePagePlugin(MorePlugin):
     '''
         Plugin that returns a page of type 'DefaultPage'
     '''
-    @property
-    def keys(self):
+
+    def get_keys(self):
         return [_UNREPEATABLE_PAGE_KEY]
 
     def build_page(self, page_builder, key_pressed, arguments):

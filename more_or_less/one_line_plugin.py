@@ -11,8 +11,7 @@ class OneLinePlugin(MorePlugin):
     def __init__(self):
         self._page_height = 1
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return ['\r', '\n']
 
     def build_page(self, page_builder, key_pressed, arguments):

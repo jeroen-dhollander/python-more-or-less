@@ -11,8 +11,7 @@ class HelpPlugin(MorePlugin):
     def __init__(self):
         pass
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return ['h', '?']
 
     def build_page(self, page_builder, key_pressed, arguments):

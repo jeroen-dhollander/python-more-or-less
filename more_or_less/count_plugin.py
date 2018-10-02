@@ -10,8 +10,7 @@ class CountPlugin(MorePlugin):
     def __init__(self):
         self._digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return self._digits
 
     def build_page(self, page_builder, key_pressed, arguments):

@@ -8,8 +8,7 @@ class QuitPlugin(MorePlugin):
         Stops output 
      '''
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return ['q', 'Q']
 
     def build_page(self, page_builder, key_pressed, arguments):

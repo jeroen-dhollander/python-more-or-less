@@ -60,8 +60,7 @@ class WrappingPlugin(MorePlugin):
         Plugin that wraps pages with a WrappingPage
     '''
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return []
 
     def build_page(self, page_builder, key_pressed, arguments):
@@ -87,8 +86,8 @@ class DefaultPlugin(MorePlugin):
     '''
         Plugin that returns a page of type 'DefaultPage'
     '''
-    @property
-    def keys(self):
+
+    def get_keys(self):
         return ['D']
 
     def build_page(self, page_builder, key_pressed, arguments):
@@ -103,8 +102,7 @@ class NestedBuilderPlugin(MorePlugin):
         Plugin that does a nested call to 'page_builder.build_next_page'
     '''
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return ['N']
 
     def build_page(self, page_builder, key_pressed, arguments):

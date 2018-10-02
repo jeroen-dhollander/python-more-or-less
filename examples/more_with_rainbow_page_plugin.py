@@ -30,8 +30,7 @@ def main():
 
 class RainbowPlugin(MorePlugin):
 
-    @property
-    def keys(self):
+    def get_keys(self):
         # We trigger our plugin on 'r' and 'R'
         return ['r', 'R']
 

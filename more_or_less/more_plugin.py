@@ -1,4 +1,4 @@
-from abc import ABC, abstractproperty, abstractmethod
+from abc import ABC, abstractmethod
 
 
 class MorePlugin(ABC):
@@ -7,8 +7,8 @@ class MorePlugin(ABC):
 
     '''
 
-    @abstractproperty
-    def keys(self):
+    @abstractmethod
+    def get_keys(self):
         ''' Returns a list of the keys the user has to enter to trigger this action. '''
         pass
 

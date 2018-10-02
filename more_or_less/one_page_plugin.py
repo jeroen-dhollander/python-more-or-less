@@ -8,8 +8,7 @@ class OnePagePlugin(MorePlugin):
         Invoked when the user types ' '. 
     '''
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return [' ']
 
     def build_page(self, page_builder, key_pressed, arguments):

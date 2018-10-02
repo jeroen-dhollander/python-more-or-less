@@ -83,5 +83,5 @@ def _build_plugins_dictionary(plugins):
     return {
         key: plugin
         for plugin in plugins
-        for key in plugin.keys
+        for key in plugin.get_keys()
     }

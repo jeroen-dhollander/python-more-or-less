@@ -12,8 +12,7 @@ class RepeatPlugin(MorePlugin):
     def __init__(self):
         self._last_page = None
 
-    @property
-    def keys(self):
+    def get_keys(self):
         return ['.']
 
     def build_page(self, page_builder, key_pressed, arguments):
