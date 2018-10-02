@@ -6,7 +6,7 @@ with open("README.rst", "r") as fh:
 
 setup(
     name='more-or-less',
-    version="0.1.5",
+    version="1.0.0",
     description="Library for adding 'more' like paging functionality to your Python application",
     long_description=long_description,
     author="Jeroen Dhollander",
