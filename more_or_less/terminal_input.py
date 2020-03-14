@@ -1,8 +1,7 @@
-from .input import Input
 import os
 import sys
-import termios
-import tty
+
+from .input import Input
 
 
 # http://ascii-table.com/ansi-escape-sequences.php
@@ -54,8 +53,7 @@ def _get_interactive_input_stream():
 
 def _create_interactive_input_stream():
     if sys.platform in ('win32', 'cygwin'):
-
-        raise NotImplemented('Reading interactive input while stdin is not a tty is not supported on Windows')
+        raise AssertionError('Reading interactive input while stdin is not a tty is not supported on Windows')
     try:
         return open('/dev/tty', 'r')
     except FileNotFoundError:
@@ -64,6 +62,8 @@ def _create_interactive_input_stream():
 
 def _read_character(file):
     '''' reads a single character. Does not wait for 'enter' '''
+    import termios
+    import tty
     fd = file.fileno()
     old_settings = termios.tcgetattr(fd)
     try:

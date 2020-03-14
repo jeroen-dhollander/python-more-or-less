@@ -142,3 +142,9 @@ For example, any time we hit a more prompt the following code will automatically
 	more_or_less.paginate(input=iterator, prompt=MyCustomInput())	    
 		   
 
+Running unittests
+------------------
+
+Checkout this code, go to the root directory and execute
+
+     python -m unittest discover tests
