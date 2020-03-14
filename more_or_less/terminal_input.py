@@ -34,7 +34,7 @@ class TerminalInput(Input):
         print(message, end='', file=self._output, flush=True)
 
     def _erase_input_prompt(self):
-        self._terminal.clear_line()
+        self._terminal.clear_line(self._output)
 
     @classmethod
     def _create_terminal(cls):
@@ -64,8 +64,8 @@ class _LinuxTerminal(object):
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-    def clear_line(self):
-        self._output.write(ERASE_LINE)
+    def clear_line(self, output):
+        output.write(ERASE_LINE)
 
     @classmethod
     def _get_interactive_input_stream(cls):
@@ -112,12 +112,12 @@ class _WindowsTerminal(object):
             raise KeyboardInterrupt
         return result
 
-    def clear_line(self):
+    def clear_line(self, output):
         # There is no clean way to clear the last output line,
         # So we simply
         #    * Go to the start of the line
         #    * Write 40 spaces
         #    * Go to the start of the line
-        sys.stdout.write("\r" + " " * 40 + "\r")
+        output.write("\r" + " " * 40 + "\r")
         return
         pass
