@@ -1,3 +1,5 @@
+import sys
+
 from . import more_plugins
 from .buffered_input import BufferedInput
 from .page_builder import PageBuilder, StopOutput
@@ -5,7 +7,6 @@ from .page_of_height import PageOfHeight
 from .page_wrapper import PageWrapper
 from .terminal_input import TerminalInput
 from .terminal_screen import TerminalScreen
-import sys
 
 
 def MorePageBuilder(*args, **kwargs):

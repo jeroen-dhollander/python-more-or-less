@@ -1,8 +1,8 @@
 from more_or_less.input import Input
 from more_or_less.more_page_builder import MorePageBuilder
 from textwrap import dedent
-from unittest.mock import Mock
 import unittest
+from unittest.mock import Mock
 
 
 class TestHelpPlugin(unittest.TestCase):

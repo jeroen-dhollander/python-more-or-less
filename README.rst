@@ -147,4 +147,4 @@ Running unittests
 
 Checkout this code, go to the root directory and execute
 
-     python -m unittest discover tests
+     python -m unittest discover tests -v
